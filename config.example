@@ -9,6 +9,8 @@
 #########    --------------------------------------------------    #########
 --- 
 plugins: 
+  gitweb: 
+    configfile: repositories.yaml
   autoload: 
   - gitweb
 servers: 
