@@ -27,7 +27,7 @@ class GitwebTest < Test::Unit::TestCase
   def test_notexisting_parse
     assert_nil(parse("This is a nil test"))
     
-    n = parse("This is a failed git::doesnotexist test")
+    n = parse("This is a failed <git doesnotexist> test")
     assert(n && n[:failed], "Should return a failed")
     
     #n = parse("This does not exist: git::master:nofile.")

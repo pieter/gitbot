@@ -77,7 +77,7 @@ class GitwebLoader
     case message
     when /\b([0-9a-f]{6,40})\b/
       return lookup(server, channel, $1)
-    when /(?:\s|^)([a-zA-Z0-9]+)?::([^:? ]+?)(\b|::)/
+    when /<([a-zA-Z0-9\-]+ )?([^:? ]+?)>/
       if l = lookup(server, channel, $2, /\/#{$1}/)
         return l
       else
