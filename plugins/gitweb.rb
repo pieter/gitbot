@@ -1,8 +1,9 @@
+require 'yaml'
 require 'net/http'
 require 'uri'
 
 class GitwebLoader
-  
+
   def initialize(configfile)
     @config = File.open(configfile) { |f| YAML::load(f) }
   end
@@ -19,7 +20,7 @@ class GitwebLoader
       return line[i1...i2]
     end
   end
-  
+
   def config
     @config ||= File.open("repositories.yaml") { |f| YAML::load(f) }
   end
@@ -49,11 +50,11 @@ class GitwebLoader
       if response["Location"] =~ /\?a=(.*?)($|\&|;)/
         type = $1
         ret = { 
-                :ref => ref,
-                :type => type,
-                :url => shorten(response["Location"]),
-                :reponame => repo_name(url)
-              }
+          :ref => ref,
+          :type => type,
+          :url => shorten(response["Location"]),
+          :reponame => repo_name(url)
+        }
         ret = ret.merge(get_details(url, type, ref))
         return ret
       end
@@ -61,8 +62,8 @@ class GitwebLoader
     return nil
   end
 
-  def lookup(irc, ref, match = nil)
-    urls = config[irc.server.name][irc.channel.name] rescue []
+  def lookup(server, channel, ref, match = nil)
+    urls = config[server][channel] rescue []
     urls.each do |url|
       next if match and url !~ match
       if a = lookup_one(url, ref)
@@ -72,6 +73,18 @@ class GitwebLoader
     return nil
   end
 
+  def parse(server, channel, message)
+    case message
+    when /\b([0-9a-f]{6,40})\b/
+      return lookup(server, channel, $1)
+    when /(?:\s|^)([a-zA-Z0-9]+)?::([^:? ]+?)(\b|::)/
+      if l = lookup(server, channel, $2, /\/#{$1}/)
+        return l
+      else
+        return { :failed => true }
+      end
+    end
+  end
 end
 
 
@@ -79,14 +92,14 @@ class Gitweb < PluginBase
 
   def initialize(*args)
     $config.merge(
-      'plugins' => {
+    'plugins' => {
+      :dir => true,
+      'gitweb' => {
         :dir => true,
-        'gitweb' => {
-          :dir => true,
-          :help => 'Settings for the gitweb plugin.',
-          'configfile' => 'The file to read repositories from'
-        }
+        :help => 'Settings for the gitweb plugin.',
+        'configfile' => 'The file to read repositories from'
       }
+    }
     )
     super(*args)
   end
@@ -111,18 +124,12 @@ class Gitweb < PluginBase
   end
 
   def hook_privmsg_chan(irc, msg)
-    case msg
-    when /\b([0-9a-f]{6,40})\b/
-      if lookup = try_lookup(irc, $1)
-        irc.puts prettify(lookup)
-      end
-    when /(?:\s|^)([a-zA-Z0-9]+)?::([^:? ]+?)(\b|::)/
-      if lookup = try_lookup(irc, $2, $1)
-        irc.puts prettify(lookup)
-      else
-        irc.reply("I'm sorry, there's no such object #{$2}")
-      end
+    return unless r = @loader.parse(msg)
+    if r[:failed]
+      irc.reply("I'm sorry, there's no such object #{$2}")
+      return
     end
+    try_lookup(irc, r)
   end
 
 end
