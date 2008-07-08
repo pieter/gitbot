@@ -3,7 +3,11 @@ require 'pluginbase'
 require 'lib/irc'
 require 'plugins/gitweb'
 require 'test/unit'
+require 'ostruct'
 
+TEST_CONFIG = File.join(File.dirname(__FILE__), "..", "repositories.yaml")
+$config = { "plugins/gitweb/configfile" => TEST_CONFIG}
+$hooks = {}
 class MockIrc
 
   attr_reader :message
@@ -12,12 +16,30 @@ class MockIrc
     @message = m
   end
 
+  def server
+    o = OpenStruct.new
+    o.name = "carnique"
+    o
+  end
+
+  def channel
+    o = OpenStruct.new
+    o.name = "#pieter"
+    o
+  end
+
+  def reply(message)
+    @message = message
+  end
+
 end
 
 class GitwebTest < Test::Unit::TestCase
 
   def setup
-    @runner = GitwebLoader.new(File.join(File.dirname(__FILE__), "..", "repositories.yaml"))
+    @runner = GitwebLoader.new(TEST_CONFIG)
+    @irc = MockIrc.new
+    @web = Gitweb.new
   end
 
   def parse(message)
@@ -72,4 +94,30 @@ class GitwebTest < Test::Unit::TestCase
     h = parse("Should find a tag in another repo: <v0.3.0>")
     assert_equal(h[:reponame], "egit")
   end
+
+  def test_nil_irc_reply
+    @web.hook_privmsg_chan(@irc, "A failed ref should output nothing: 324aabbb3434")
+    assert_equal(@irc.message, nil)
+  end
+
+  def test_explicit_nil_irc_reply
+    @web.hook_privmsg_chan(@irc, "A failed explicit ref should output nothing: <git nonsensebranch>.")
+    assert_equal("I'm sorry, there's no such object: nonsensebranch.", @irc.message)
+  end
+
+  def test_explicit_irc_reply
+    @web.hook_privmsg_chan(@irc, "A succesful lookup should not give an error: <git master>.")
+    assert(@irc.message =~ /^\[git master\]: http.* -- ".*"$/)
+  end
+
+  def test_implicit_irc_reply
+    @web.hook_privmsg_chan(@irc, "This is interesting -- 88d9f4111f185d665b8340819bd50713a4a2caf8.")
+    assert_match(/^\[egit 88d9f4111\]: http.* -- ".*"$/, @irc.message)
+  end
+
+  def test_implicit_irc_tree_reply
+    @web.hook_privmsg_chan(@irc, "This is interesting -- cc73fa2e4ea56951a75f52e15a0d4385e8e5e6b2.")
+    assert_match(/^\[egit cc73fa2e4\]: http.* \[tree\]$/, @irc.message)
+  end
+
 end

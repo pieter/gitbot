@@ -75,13 +75,16 @@ class GitwebLoader
   def parse(server, channel, message)
     case message
     when /<([a-zA-Z0-9\-]+ )?([^:? ]+?)>/
+      # If a reponame is specified, match on /repo.git
       match = $1 ? /\/#{$1[0..-2]}\.git/ : nil
       if l = lookup(server, channel, $2, match)
         return l
       else
-        return { :failed => true }
+        # Return an explicit failure
+        return { :failed => true, :ref => $2 }
       end
     when /\b([0-9a-f]{6,40})\b/
+      # Fail silently if necessary
       return lookup(server, channel, $1)
     end
   end
@@ -108,13 +111,8 @@ class Gitweb < PluginBase
     @loader = GitwebLoader.new($config["plugins/gitweb/configfile"])
   end
 
-  def try_lookup(irc, ref, prefix=nil)
-    prefix = /\/#{prefix}/ if prefix
-    @loader.lookup(irc, ref, prefix)
-  end
-
   def prettify(r)
-    s = "[#{r[:reponame]}::#{r[:ref][0..8]}]: #{r[:url]}"
+    s = "[#{r[:reponame]} #{r[:ref][0..8]}]: #{r[:url]}"
     if r[:subject]
       s << " -- \"#{r[:subject]}\""
     else
@@ -124,12 +122,12 @@ class Gitweb < PluginBase
   end
 
   def hook_privmsg_chan(irc, msg)
-    return unless r = @loader.parse(msg)
+    return unless r = @loader.parse(irc.server.name, irc.channel.name, msg)
     if r[:failed]
-      irc.reply("I'm sorry, there's no such object #{$2}")
+      irc.reply("I'm sorry, there's no such object: #{r[:ref]}.")
       return
     end
-    try_lookup(irc, r)
+    irc.puts prettify(r)
   end
 
 end
