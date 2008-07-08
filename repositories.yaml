@@ -1,5 +1,9 @@
 ---
 carnique:
-    "#pieter":
-    - http://repo.or.cz/w/git.git
-    - http://repo.or.cz/w/egit.git
+  "#pieter":
+  - http://repo.or.cz/w/git.git
+  - http://repo.or.cz/w/egit.git
+freenode:
+  "#git":
+  - http://repo.or.cz/w/git.git
+  - http://repo.or.cz/w/egit.git
