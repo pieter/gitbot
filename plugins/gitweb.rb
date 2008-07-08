@@ -36,7 +36,6 @@ class GitwebLoader
   end
 
   def repo_name(ref)
-    puts "matching #{ref}"
     if ref =~ /\/([^\/]+)\.git/
       return $1
     else
@@ -75,14 +74,15 @@ class GitwebLoader
 
   def parse(server, channel, message)
     case message
-    when /\b([0-9a-f]{6,40})\b/
-      return lookup(server, channel, $1)
     when /<([a-zA-Z0-9\-]+ )?([^:? ]+?)>/
-      if l = lookup(server, channel, $2, /\/#{$1}/)
+      match = $1 ? /\/#{$1[0..-2]}\.git/ : nil
+      if l = lookup(server, channel, $2, match)
         return l
       else
         return { :failed => true }
       end
+    when /\b([0-9a-f]{6,40})\b/
+      return lookup(server, channel, $1)
     end
   end
 end
