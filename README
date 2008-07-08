@@ -37,11 +37,13 @@ search for the sha1. On the first hit it will return the repository and a link
 to the object. If the object is a commit or hash, it will also supply the
 subject.
 
-There is also an explicit syntax in the form of <(repo SP)? ref> (where SP is
-a space). If repo is supplied, GitBot will only look in a repository with that
-name. Otherwise, it will walk all repositories. ref can be anything like a
-sha1, a tag or a branch name. Commit walking is not accepted, so "HEAD^" will
-fail. If GitBot cannot find the ref, it will produce an error message.
+There is also an explicit syntax in the form of <(repo SP)? ref (COLON path)?>
+(where SP is a space). If repo is supplied, GitBot will only look in a
+repository with that name. Otherwise, it will walk all repositories. ref can
+be anything like a sha1, a tag or a branch name. Commit walking is not
+accepted, so "HEAD^" will fail. If GitBot cannot find the ref, it will produce
+an error message. If a path is specified, GitBot will try to look up that tree
+or blob and gives a url to that object once found.
 
 Notes
 ======

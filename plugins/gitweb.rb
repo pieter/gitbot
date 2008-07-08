@@ -25,10 +25,10 @@ class GitwebLoader
     @config ||= File.open("repositories.yaml") { |f| YAML::load(f) }
   end
 
-  def get_details(url, type, ref)
+  def get_details(url, type)
     return {} unless type == "commit" || type == "tag"
 
-    a = Net::HTTP.get(URI.parse(url + "/?a=#{type};h=#{ref}"))
+    a = Net::HTTP.get(URI.parse(url))
     return { :subject => $1 } if a =~ /class=\"title".*?>(.*?)<(span|\/a)/
 
     # Nothing found
@@ -43,29 +43,35 @@ class GitwebLoader
     end
   end
 
-  def lookup_one(url, ref)
-    response = Net::HTTP.get_response(URI.parse(url + "/?a=object;h=#{ref}"))
+  def lookup_one(url, ref, file)
+    if file
+      url = url + "/?a=object;f=#{file};hb=#{ref}"
+    else
+      url += "/?a=object;h=#{ref}"
+    end
+    response = Net::HTTP.get_response(URI.parse(url))
     if response.is_a? Net::HTTPRedirection
       if response["Location"] =~ /\?a=(.*?)($|\&|;)/
         type = $1
         ret = { 
+          :file => file,
           :ref => ref,
           :type => type,
           :url => shorten(response["Location"]),
           :reponame => repo_name(url)
         }
-        ret = ret.merge(get_details(url, type, ref))
+        ret = ret.merge(get_details(response["Location"], type))
         return ret
       end
     end
     return nil
   end
 
-  def lookup(server, channel, ref, match = nil)
+  def lookup(server, channel, ref, match = nil, file=nil)
     urls = config[server][channel] rescue []
     urls.each do |url|
       next if match and url !~ match
-      if a = lookup_one(url, ref)
+      if a = lookup_one(url, ref, file)
         return a
       end
     end
@@ -74,14 +80,14 @@ class GitwebLoader
 
   def parse(server, channel, message)
     case message
-    when /<([a-zA-Z0-9\-]+ )?([^:? ]+?)>/
+    when /<([a-zA-Z0-9\-]+ )?([^:? ]+?)(:([^:? ]+))?>/
       # If a reponame is specified, match on /repo.git
       match = $1 ? /\/#{$1[0..-2]}\.git/ : nil
-      if l = lookup(server, channel, $2, match)
+      if l = lookup(server, channel, $2, match, $4)
         return l
       else
         # Return an explicit failure
-        return { :failed => true, :ref => $2 }
+        return { :failed => true, :ref => $2, :file => $4 }
       end
     when /\b([0-9a-f]{6,40})\b/
       # Fail silently if necessary
@@ -112,7 +118,13 @@ class Gitweb < PluginBase
   end
 
   def prettify(r)
-    s = "[#{r[:reponame]} #{r[:ref][0..8]}]: #{r[:url]}"
+    # Use the filename if a file/tree was provided, otherwise use the ref
+    if r[:file]
+      name = File.basename(r[:file])
+    else
+      name = r[:ref][0..8]
+    end
+    s = "[#{r[:reponame]} #{name}]: #{r[:url]}"
     if r[:subject]
       s << " -- \"#{r[:subject]}\""
     else
@@ -124,7 +136,9 @@ class Gitweb < PluginBase
   def hook_privmsg_chan(irc, msg)
     return unless r = @loader.parse(irc.server.name, irc.channel.name, msg)
     if r[:failed]
-      irc.reply("I'm sorry, there's no such object: #{r[:ref]}.")
+      object = r[:ref]
+      object += ":#{r[:file]}" if r[:file]
+      irc.reply("I'm sorry, there's no such object: #{object}.")
       return
     end
     irc.puts prettify(r)
