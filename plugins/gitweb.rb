@@ -47,9 +47,10 @@ class GitwebLoader
     return nil
   end
 
-  def lookup(irc, ref)
+  def lookup(irc, ref, match = nil)
     urls = config[irc.server.name][irc.channel.name] rescue []
     urls.each do |url|
+      next if match and url !~ match
       if a = lookup_one(url, ref)
         return a
       end
@@ -80,8 +81,9 @@ class Gitweb < PluginBase
     @loader = GitwebLoader.new($config["plugins/gitweb/configfile"])
   end
 
-  def try_lookup(irc, ref)
-    if r = @loader.lookup(irc, ref)
+  def try_lookup(irc, ref, prefix=nil)
+    prefix = /\/#{prefix}/ if prefix
+    if r = @loader.lookup(irc, ref, prefix)
       s = "#{ref[0..8]} is a #{r[:type]}. Gitweb: #{r[:url]}"
       s << " -- #{r[:subject]}" if r[:subject]
       irc.reply s
@@ -91,11 +93,11 @@ class Gitweb < PluginBase
   end
 
   def hook_privmsg_chan(irc, msg)
-    if msg =~ /\s*([0-9a-f]{6,40})\s*/
+    if msg =~ /\b([0-9a-f]{6,40})\b/
       try_lookup(irc, $1)
-    elsif msg =~ /::(.*?)(\s|$|::)/
-      unless try_lookup(irc, $1)
-        irc.reply("I'm sorry, there's no such object #{$1}")
+    elsif msg =~ /\b([a-zA-Z0-9]+)?::([^:? ]+?)(\b|::)/
+      unless try_lookup(irc, $2, $1)
+        irc.reply("I'm sorry, there's no such object #{$2}")
       end
     end
   end

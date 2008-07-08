@@ -15,43 +15,43 @@ plugins:
   - gitweb
 servers: 
   carnique: 
-    autoconnect: true
     nicks: 
     - Gitbot
     - Gitbot_
     - Gitbot__
+    autoconnect: true
+    host: irc.carnique.nl
     users: 
       pieter: 
-        plugins: 
-        - test
         masks: 
         - Pieter!*@*
+        plugins: 
+        - test
         owner: true
-        password: xxxxx
-    host: irc.carnique.nl
+        password: 09c796da09195b579f95b0b4307ad9f690e3da4b
     channels: 
       "#pieter": 
         chanserv: 
           op: false
   freenode: 
-    autoconnect: false
     nicks: 
     - Gitbot
     - Gitbot_
     - Gitbot__
-    users: 
-      Pieter: 
-        plugins: 
-        - test
-        masks: 
-        - Pieter!*@*
-        owner: true
-        password: xxxx
-    host: irc.freenode.net
+    autoconnect: false
     services: 
       nickserv: 
         whois-code: 320
         password: "bot # \xE2\x86\x91 Password to identify with nickserv."
+    host: irc.freenode.net
+    users: 
+      Pieter: 
+        masks: 
+        - Pieter!*@*
+        plugins: 
+        - test
+        owner: true
+        password: ochjeetje
     channels: 
       "#pieter": 
         chanserv: 
