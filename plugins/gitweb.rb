@@ -85,9 +85,11 @@ class GitwebLoader
       match = $1 ? /\/#{$1[0..-2]}\.git/ : nil
       if l = lookup(server, channel, $2, match, $4)
         return l
-      else
+      elsif $1 || $4
         # Return an explicit failure
         return { :failed => true, :ref => $2, :file => $4 }
+      else
+        return nil
       end
     when /\b([0-9a-f]{6,40})\b/
       # Fail silently if necessary
