@@ -34,12 +34,26 @@ class GitwebLoader
     return {}
   end
 
+  def repo_name(ref)
+    puts "matching #{ref}"
+    if ref =~ /\/([^\/]+)\.git/
+      return $1
+    else
+      return nil
+    end
+  end
+
   def lookup_one(url, ref)
     response = Net::HTTP.get_response(URI.parse(url + "/?a=object;h=#{ref}"))
     if response.is_a? Net::HTTPRedirection
       if response["Location"] =~ /\?a=(.*?)($|\&|;)/
         type = $1
-        ret = { :type => type, :url => shorten(response["Location"]) }
+        ret = { 
+                :ref => ref,
+                :type => type,
+                :url => shorten(response["Location"]),
+                :reponame => repo_name(url)
+              }
         ret = ret.merge(get_details(url, type, ref))
         return ret
       end
@@ -83,20 +97,29 @@ class Gitweb < PluginBase
 
   def try_lookup(irc, ref, prefix=nil)
     prefix = /\/#{prefix}/ if prefix
-    if r = @loader.lookup(irc, ref, prefix)
-      s = "#{ref[0..8]} is a #{r[:type]}. Gitweb: #{r[:url]}"
-      s << " -- #{r[:subject]}" if r[:subject]
-      irc.reply s
-      return true
+    @loader.lookup(irc, ref, prefix)
+  end
+
+  def prettify(r)
+    s = "[#{r[:reponame]}::#{r[:ref][0..8]}]: #{r[:url]}"
+    if r[:subject]
+      s << " -- \"#{r[:subject]}\""
+    else
+      s << " [#{r[:type]}]"
     end
-    return nil
+    s
   end
 
   def hook_privmsg_chan(irc, msg)
-    if msg =~ /\b([0-9a-f]{6,40})\b/
-      try_lookup(irc, $1)
-    elsif msg =~ /\b([a-zA-Z0-9]+)?::([^:? ]+?)(\b|::)/
-      unless try_lookup(irc, $2, $1)
+    case msg
+    when /\b([0-9a-f]{6,40})\b/
+      if lookup = try_lookup(irc, $1)
+        irc.puts prettify(lookup)
+      end
+    when /(?:\s|^)([a-zA-Z0-9]+)?::([^:? ]+?)(\b|::)/
+      if lookup = try_lookup(irc, $2, $1)
+        irc.puts prettify(lookup)
+      else
         irc.reply("I'm sorry, there's no such object #{$2}")
       end
     end
