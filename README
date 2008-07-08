@@ -1,0 +1,53 @@
+GitBot
+======
+
+GitBot is based on "Six", the bot used in ##textmate on freenode. This bot
+was forked of of "CyBot". "Six" can be found on github.com/kballard/six.
+
+GitBot allows you to specify commits in an irc channel, and get an url to
+that commit back. Currently, it only supports gitweb urls.
+
+Repository Configuration
+=======
+Repositories are specified in a YAML'd version of a ruby 
+hash[servername][channelname] array. An example can be found in the supplied
+repositories.yaml, but the general syntax is:
+
+---
+freenode:
+  channel1:
+  - http://repo1
+  - http://repo2
+  channel2:
+  - http://repo
+ircnet:
+ channel1:
+ - http://repo
+
+Note the explicit use of spaces. The configuration file can be specified with
+the plugins/gitweb/configfile config path (see the supplied config.example).
+
+Syntax
+=======
+
+There are two ways to trigger GitBot. The first is implicit by pasting a sha1.
+This sha1 can be abbrevated (to at least 7 characters) or a full sha1. In this
+case, GitBot will walk through the supplied repo list from top to bottom to
+search for the sha1. On the first hit it will return the repository and a link
+to the object. If the object is a commit or hash, it will also supply the
+subject.
+
+There is also an explicit syntax in the form of <(repo SP)? ref> (where SP is
+a space). If repo is supplied, GitBot will only look in a repository with that
+name. Otherwise, it will walk all repositories. ref can be anything like a
+sha1, a tag or a branch name. Commit walking is not accepted, so "HEAD^" will
+fail. If GitBot cannot find the ref, it will produce an error message.
+
+Notes
+======
+
+As GitBot walks the repository list, the order in which you specify
+repositories is important. In general, you should you put the "main" one on
+the top. For #git, this is http://repo.or.cz/w/git.git. Alternates can be put
+under it, but be careful with too many repositories as this can cause a big
+load on the servers.
