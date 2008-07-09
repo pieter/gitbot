@@ -114,4 +114,12 @@ class GitwebTest < Test::Unit::TestCase
     h = parse("Should not give an error <when this> is being said")
     assert_nil(h)
   end
+
+  def test_parse_weird_characters
+    h = parse("Should not fail on weird refspecs like <git master^>")
+    assert_nil(h)
+
+    h = parse("Should not fail on weird refspecs like <git master~2>")
+    assert_nil(h)
+  end
 end

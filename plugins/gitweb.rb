@@ -98,7 +98,7 @@ class GitwebLoader
   def parse(server, channel, message)
     case message
     # Matches <repo branch:Tree>
-    when /<(?:([a-zA-Z0-9\-]+) )?([^:? ]+?)(:([^:? ]+))?>/
+    when /<(?:([a-zA-Z0-9\-]+) )?([^:?\^\$\~ ]+?)(:([^:?\^\$\~ ]+))?>/
       return handle_extended(server, channel, $1, $2, $4)
     # Matches a plain ref
     when /\b([0-9a-f]{6,40})\b/
