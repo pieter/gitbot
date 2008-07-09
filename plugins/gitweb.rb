@@ -1,6 +1,7 @@
 require 'yaml'
 require 'net/http'
 require 'uri'
+require 'support/htmlentities'
 
 class GitwebLoader
 
@@ -29,7 +30,7 @@ class GitwebLoader
     return {} unless type == "commit" || type == "tag"
 
     a = Net::HTTP.get(URI.parse(url))
-    return { :subject => $1 } if a =~ /class=\"title".*?>(.*?)<(span|\/a)/
+    return { :subject => $1.decode_entities } if a =~ /class=\"title".*?>(.*?)<(span|\/a)/
 
     # Nothing found
     return {}
