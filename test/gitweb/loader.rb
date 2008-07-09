@@ -92,4 +92,10 @@ class GitwebTest < Test::Unit::TestCase
     puts h[:url]
   end
 
+  def test_silence_after_once
+    h = parse("SHolud parse this once: 88d9f4111f185d665b8340819bd50713a4a2caf8")
+    assert(h)
+    h = parse("But not twice -- 88d9f4111f185d665b8340819bd50713a4a2caf8")
+    assert_nil(h)
+  end
 end

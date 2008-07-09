@@ -7,6 +7,7 @@ class GitwebLoader
 
   def initialize(configfile)
     @config = File.open(configfile) { |f| YAML::load(f) }
+    @log = Hash.new { |x,y| x[y] = Hash.new { |z,q| z[q] = {} } }
   end
 
   def shorten(url)
@@ -85,6 +86,7 @@ class GitwebLoader
       # If a reponame is specified, match on /repo.git
       match = $1 ? /\/#{$1[0..-2]}\.git/ : nil
       if l = lookup(server, channel, $2, match, $4)
+        @log[server][channel][$2[0..6]] = Time.now
         return l
       elsif $1 || $4
         # Return an explicit failure
@@ -93,7 +95,11 @@ class GitwebLoader
         return nil
       end
     when /\b([0-9a-f]{6,40})\b/
+      # Do nothing if has been mentioned < 5 minutes ago
+      ref = $1.to_s[0..6]
+      return if @log[server][channel][ref] and (Time.now - @log[server][channel][ref] < 60 * 5)
       # Fail silently if necessary
+      @log[server][channel][ref] = Time.now
       return lookup(server, channel, $1)
     end
   end
