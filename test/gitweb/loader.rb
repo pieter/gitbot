@@ -48,6 +48,7 @@ class GitwebTest < Test::Unit::TestCase
     assert_equal(h[:type], "commit")
     assert_equal(h[:reponame], "egit")
 
+    setup
     h = parse("It should also work between parenthesis (88d9f4111f185d665b8340819bd50713a4a2caf8)")
     assert_equal(h[:reponame], "egit")
 
@@ -107,5 +108,10 @@ class GitwebTest < Test::Unit::TestCase
     assert(h)
 
     class <<Time; alias now old; end
+  end
+
+  def test_silence_with_unknown_repo
+    h = parse("Should not give an error <when this> is being said")
+    assert_nil(h)
   end
 end

@@ -47,7 +47,7 @@ class GitwebLoader
 
   def lookup_one(url, ref, file)
     if file
-      url = url + "/?a=object;f=#{file};hb=#{ref}"
+      url += "/?a=object;f=#{file};hb=#{ref}"
     else
       url += "/?a=object;h=#{ref}"
     end
@@ -69,38 +69,46 @@ class GitwebLoader
     return nil
   end
 
-  def lookup(server, channel, ref, match = nil, file=nil)
-    urls = config[server][channel] rescue []
+  def lookup(urls, ref, tree=nil)
     urls.each do |url|
-      next if match and url !~ match
-      if a = lookup_one(url, ref, file)
+      if a = lookup_one(url, ref, tree)
         return a
       end
     end
     return nil
   end
 
+  def handle_extended(server, channel, repo, ref, tree)
+    urls = config[server][channel] rescue []
+    urls = urls.select { |x| x =~ /\/#{repo}\.git/ } if repo
+
+    return if urls.empty?
+
+    if l = lookup(urls, ref, tree)
+      @log[server][channel][ref] = Time.now
+      return l
+    elsif repo || tree
+      # Return an explicit failure
+      return { :failed => true, :ref => ref, :file => tree }
+    end
+
+    return nil
+  end
+
   def parse(server, channel, message)
     case message
-    when /<([a-zA-Z0-9\-]+ )?([^:? ]+?)(:([^:? ]+))?>/
-      # If a reponame is specified, match on /repo.git
-      match = $1 ? /\/#{$1[0..-2]}\.git/ : nil
-      if l = lookup(server, channel, $2, match, $4)
-        @log[server][channel][$2[0..6]] = Time.now
-        return l
-      elsif $1 || $4
-        # Return an explicit failure
-        return { :failed => true, :ref => $2, :file => $4 }
-      else
-        return nil
-      end
+    # Matches <repo branch:Tree>
+    when /<(?:([a-zA-Z0-9\-]+) )?([^:? ]+?)(:([^:? ]+))?>/
+      return handle_extended(server, channel, $1, $2, $4)
+    # Matches a plain ref
     when /\b([0-9a-f]{6,40})\b/
       # Do nothing if has been mentioned < 5 minutes ago
       ref = $1.to_s[0..6]
       return if @log[server][channel][ref] and (Time.now - @log[server][channel][ref] < 60 * 5)
       # Fail silently if necessary
       @log[server][channel][ref] = Time.now
-      return lookup(server, channel, $1)
+      urls = config[server][channel] rescue []
+      return lookup(urls, $1)
     end
   end
 end
