@@ -97,5 +97,15 @@ class GitwebTest < Test::Unit::TestCase
     assert(h)
     h = parse("But not twice -- 88d9f4111f185d665b8340819bd50713a4a2caf8")
     assert_nil(h)
+
+    class <<Time
+      alias old now
+      def now; old + 5 * 60; end
+    end
+
+    h = parse("But it does after 5 minutes -- 88d9f4111f185d665b8340819bd50713a4a2caf8")
+    assert(h)
+
+    class <<Time; alias now old; end
   end
 end
