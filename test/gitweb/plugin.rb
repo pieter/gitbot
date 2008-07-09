@@ -53,12 +53,12 @@ class GitwebPluginTest < Test::Unit::TestCase
 
   def test_explicit_irc_reply
     @web.hook_privmsg_chan(@irc, "A succesful lookup should not give an error: <git master>.")
-    assert_match(/^\[git master\]: http.* -- ".*"$/, @irc.message)
+    assert_match(/^\[git master\]: http.* -- .*$/, @irc.message)
   end
 
   def test_implicit_irc_reply
     @web.hook_privmsg_chan(@irc, "This is interesting -- 88d9f4111f185d665b8340819bd50713a4a2caf8.")
-    assert_match(/^\[egit 88d9f4111\]: http.* -- ".*"$/, @irc.message)
+    assert_match(/^\[egit 88d9f4111\]: http.* -- .*$/, @irc.message)
   end
 
   def test_implicit_irc_tree_reply

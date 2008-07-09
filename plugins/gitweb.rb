@@ -143,7 +143,7 @@ class Gitweb < PluginBase
     end
     s = "[#{r[:reponame]} #{name}]: #{r[:url]}"
     if r[:subject]
-      s << " -- \"#{r[:subject]}\""
+      s << " -- #{r[:subject]}"
     else
       s << " [#{r[:type]}]"
     end
