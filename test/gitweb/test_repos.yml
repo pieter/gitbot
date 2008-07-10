@@ -1,0 +1,6 @@
+---
+carnique:
+  "#pieter":
+  - "repo:git.git"
+  - "repo:egit.git"
+  - "http://git.frim.nl/?p=gitbot.git"

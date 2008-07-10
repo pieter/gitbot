@@ -6,7 +6,7 @@ require 'git'
 require 'test/unit'
 require 'ostruct'
 
-TEST_CONFIG = File.join(File.dirname(__FILE__), "..", "..", "repositories.yaml")
+TEST_CONFIG = File.join(File.dirname(__FILE__), "test_repos.yml")
 
 class GitwebTest < Test::Unit::TestCase
 
