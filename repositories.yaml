@@ -1,9 +1,10 @@
 ---
-carnique:
+freenode:
+  "#git":
+  - "repo:git.git"
+  - "repo:egit.git"
+  - "http://git.frim.nl/?p=gitbot.git"
   "#pieter":
   - "repo:git.git"
   - "repo:egit.git"
-freenode:
-  "#git":
-  - http://repo.or.cz/w/git.git
-  - http://repo.or.cz/w/egit.git
+  - "http://git.frim.nl/?p=gitbot.git"
