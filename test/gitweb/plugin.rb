@@ -1,6 +1,6 @@
 $: << File.join(File.dirname(__FILE__), "..", "..")
 require 'lib/pluginbase'
-require 'lib/irc'
+require 'plugins/irc'
 require 'plugins/gitweb'
 require 'test/unit'
 require 'ostruct'
