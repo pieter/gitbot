@@ -9,9 +9,11 @@ $command = ?$ # Make sure the ? preceeds your character.
 
 # Some modules we need.
 require 'thread'
+$: << File.join(File.dirname(__FILE__), "lib")
 require 'pluginbase'
-require 'configspace/configspace'
-require 'lib/logging'
+require 'configspace'
+require 'logging'
+#require 'irc'
 
 # Create a log instance
 $log = Logging.new
@@ -23,7 +25,7 @@ $log.puts "CyBot v#{$version} starting up..."
 # =====================
 
 # Root plugins. We always need these.
-RootPlugins = ['plugin', 'irc', 'user', 'test']
+RootPlugins = ['plugin', 'user', 'test', 'irc']
 
 # Provide a namespace for plugins.
 module Plugins
@@ -41,7 +43,7 @@ def load_plugin(name)
 
     # Try to load.
     n = name.downcase
-    Plugins.module_eval { load("lib/#{n}.rb") }
+    Plugins.module_eval { load("plugins/#{n}.rb") }
 
     # Find the class.
     if (klass = self.class.const_get(n.capitalize))
