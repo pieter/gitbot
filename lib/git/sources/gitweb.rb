@@ -17,7 +17,7 @@ class Git::Source::Gitweb
   end
 
   def name
-    @url =~ /\/([^\/]+)\.git/
+    @url =~ /([^\/:=;]+)\.git/
     return $1
   end
   
@@ -38,7 +38,7 @@ class Git::Source::Gitweb
     url = object_url(ref, file)
     response = Net::HTTP.get_response(url)
     if response.is_a? Net::HTTPRedirection
-      if response["Location"] =~ /\?a=(.*?)($|\&|;)/
+      if response["Location"] =~ /[\?;]a=(.*?)($|\&|;)/
         type = $1
         ret = { 
           :file => file,
