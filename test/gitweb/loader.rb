@@ -1,7 +1,7 @@
 $: << File.join(File.dirname(__FILE__), "..", "..", "lib")
 require 'pluginbase'
 require 'irc'
-require 'gitweb'
+require 'git'
 require 'test/unit'
 require 'ostruct'
 
@@ -10,11 +10,13 @@ TEST_CONFIG = File.join(File.dirname(__FILE__), "..", "..", "repositories.yaml")
 class GitwebTest < Test::Unit::TestCase
 
   def setup
-    @runner = GitwebLoader.new(TEST_CONFIG)
+    @runner = Git.new(TEST_CONFIG)
+    @channel = OpenStruct.new({:nname => "#pieter", :server => OpenStruct.new({:name => "carnique"})})
+    
   end
 
   def parse(message)
-    @runner.parse("carnique", "#pieter", message)
+    @runner.parse(@channel, message)
   end
 
   def test_notexisting_parse
@@ -41,7 +43,7 @@ class GitwebTest < Test::Unit::TestCase
     assert_equal(h[:ref], "bed625540a0e1a4ba4da9962ed53c1d83d9bf509", "Should have equal hashes")
     assert_equal(h[:type], "commit")
     assert_equal(h[:reponame], "git")
-    assert(h[:url] =~ /tinyurl/)
+    assert(h[:url] =~ /repo.or.cz/)
 
     h = parse("This is a ref in egit: 88d9f4111f185d665b8340819bd50713a4a2caf8.")
     assert_equal(h[:ref], "88d9f4111f185d665b8340819bd50713a4a2caf8")

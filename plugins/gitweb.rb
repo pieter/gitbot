@@ -1,4 +1,4 @@
-require 'gitweb'
+require 'git'
 
 class Gitweb < PluginBase
 
@@ -16,8 +16,21 @@ class Gitweb < PluginBase
     super(*args)
   end
 
+  def shorten(url)
+    http = Net::HTTP.start("tinyurl.com", 80)
+    response = http.post("/create.php", "url=#{url}")
+
+    if response.code == "200"
+      body = response.read_body
+      line = body.split("\n").find { |l| l =~ /hidden name=tinyurl/ }
+      i1 = line.index("http")
+      i2 = line.rindex("\"")
+      return line[i1...i2]
+    end
+  end
+
   def load
-    @loader = GitwebLoader.new($config["plugins/gitweb/configfile"])
+    @loader = Git.new($config["plugins/gitweb/configfile"])
   end
 
   def prettify(r)
@@ -27,7 +40,7 @@ class Gitweb < PluginBase
     else
       name = r[:ref][0..8]
     end
-    s = "[#{r[:reponame]} #{name}]: #{r[:url]}"
+    s = "[#{r[:reponame]} #{name}]: #{shorten(r[:url])}"
     if r[:subject]
       s << " -- #{r[:subject]}"
     else
@@ -37,7 +50,7 @@ class Gitweb < PluginBase
   end
 
   def hook_privmsg_chan(irc, msg)
-    return unless r = @loader.parse(irc.server.name, irc.channel.name, msg)
+    return unless r = @loader.parse(irc.channel, msg)
     if r[:failed]
       object = r[:ref]
       object += ":#{r[:file]}" if r[:file]
