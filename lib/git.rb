@@ -28,7 +28,7 @@ class Git
   end
 
   def handle_extended(channel, repo, ref, tree)
-    match = repo ? /\/#{repo}\.git/ : nil
+    match = repo ? /\b#{repo}\.git/ : nil
     
     l = channel.lookup(ref, match, tree)
 
