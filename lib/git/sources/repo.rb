@@ -3,6 +3,7 @@ require 'git/sources/gitweb'
 class Git::Source::Repo < Git::Source::Gitweb
   
   Git::Source::Source.add_handler(/repo:/, self)
+  def self.public?; true; end
 
   attr_accessor :name
   def initialize(url)

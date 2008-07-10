@@ -125,4 +125,27 @@ class GitwebTest < Test::Unit::TestCase
     h = parse("Should not fail on weird refspecs like <git master~2>")
     assert_nil(h)
   end
+
+  def test_parse_external_repo
+    h = parse("Test this! <repo:git.git HEAD>")
+    assert(h)
+    assert_equal("commit", h[:type])
+    assert_match(/repo.or.cz\/w\/git.git?/, h[:url])
+    assert_equal("HEAD", h[:ref])
+    assert_equal("git", h[:reponame])
+
+    h = parse("TEst! <repo:git.git v1.5.3:Documentation>")
+    assert(h)
+    assert_equal("tree", h[:type])
+    assert_equal("Documentation", h[:file])
+    assert_equal("git", h[:reponame])
+  end
+
+  def test_parse_external_gitweb
+    h = parse("This is cool: <http://git.frim.nl/?p=gitbot.git HEAD>")
+    assert(h)
+    assert_equal("commit", h[:type])
+    assert_equal("gitbot", h[:reponame])
+    assert_equal("HEAD", h[:ref])
+  end
 end

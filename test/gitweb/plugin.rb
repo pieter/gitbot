@@ -75,5 +75,10 @@ class GitwebPluginTest < Test::Unit::TestCase
   def test_false_path
     @web.hook_privmsg_chan(@irc, "Look at <HEAD:nonexistingfile>!.")
     assert_equal("I'm sorry, there's no such object: HEAD:nonexistingfile.", @irc.message)
-  end    
+  end
+
+  def test_external_path
+    @web.hook_privmsg_chan(@irc, "Look at <repo:etorrent.git HEAD>")
+    assert_match(/^\[etorrent HEAD\]: http.* -- .*/, @irc.message)
+  end
 end

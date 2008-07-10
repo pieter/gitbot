@@ -1,6 +1,8 @@
 class Git; module Source; end; end
 class Git::Source::Source
 
+  def self.public?; false; end
+
   class << self
 
     def add_handler(match, klass)
@@ -15,6 +17,15 @@ class Git::Source::Source
         end
       end
       raise RuntimeError.new("Could not find a handler for this url: #{url}")
+    end
+
+    def find_public(url)
+      @handles.each do |match, klass|
+        if url =~ match and klass.public?
+          return klass.new(url)
+        end
+      end
+      nil
     end
 
   end

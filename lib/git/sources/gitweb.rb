@@ -1,6 +1,7 @@
 class Git::Source::Gitweb
 
   Git::Source::Source.add_handler(/http:\/\//, self)
+  def self.public?; true; end
 
   def initialize(url)
     @url = url
