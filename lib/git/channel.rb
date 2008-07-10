@@ -1,4 +1,4 @@
-require 'git/sources/gitweb'
+require 'git/sources/source'
 
 # A class representing a channel from the Git side, to allow us to maintain
 # a list of repositories, a log, etc.
@@ -7,7 +7,7 @@ class Git::Channel
   def initialize(urls)
     # For now, we only support Gitweb, but if we extend urls, we can support
     # other types
-    @sources = urls.map { |url| Git::Source::Gitweb.new(url) }
+    @sources = urls.map { |url| Git::Source::Source.create(url) }
     @log = {}
   end
   

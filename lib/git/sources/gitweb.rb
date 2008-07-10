@@ -1,5 +1,6 @@
-class Git; module Source; end; end
 class Git::Source::Gitweb
+
+  Git::Source::Source.add_handler(/http:\/\//, self)
 
   def initialize(url)
     @url = url
@@ -24,14 +25,18 @@ class Git::Source::Gitweb
     return @url =~ match
   end
 
-  def lookup(ref, file)
+  def object_url(ref, file)
     if file
-      url = @url + "/?a=object;f=#{file};hb=#{ref}"
+      url = @url + ";a=object;f=#{file};hb=#{ref}"
     else
-      url = @url + "/?a=object;h=#{ref}"
+      url = @url + ";a=object;h=#{ref}"
     end
+    return URI.parse(url)
+  end
 
-    response = Net::HTTP.get_response(URI.parse(url))
+  def lookup(ref, file)
+    url = object_url(ref, file)
+    response = Net::HTTP.get_response(url)
     if response.is_a? Net::HTTPRedirection
       if response["Location"] =~ /\?a=(.*?)($|\&|;)/
         type = $1
