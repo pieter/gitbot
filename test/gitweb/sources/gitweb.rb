@@ -1,4 +1,4 @@
-$: << File.join(File.dirname(__FILE__), "..", "..", "lib")
+$: << File.join(File.dirname(__FILE__), "..", "..", "..", "lib")
 require 'git'
 require 'test/unit'
 require 'ostruct'
