@@ -41,11 +41,13 @@ class Git::Source::Gitweb
     if response.is_a? Net::HTTPRedirection
       if response["Location"] =~ /[\?;]a=(.*?)($|\&|;)/
         type = $1
+        # Point to commitdiff and not commitpage when referring a commit
+        new_url = response["Location"].gsub("a=commit;", "a=commitdiff;")
         ret = { 
           :file => file,
           :ref => ref,
           :type => type,
-          :url => response["Location"],
+          :url => new_url,
           :reponame => name
         }
         ret = ret.merge(get_details(response["Location"], type))

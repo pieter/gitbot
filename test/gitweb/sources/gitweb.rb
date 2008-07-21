@@ -25,7 +25,7 @@ class GitwebTest < Test::Unit::TestCase
   def test_lookup_HEAD
     l = @source.lookup("HEAD", nil)
     assert(l)
-    assert_equal(l[:url], "http://git.frim.nl/?p=gitbot.git;a=commit;h=HEAD")
+    assert_equal(l[:url], "http://git.frim.nl/?p=gitbot.git;a=commitdiff;h=HEAD")
     assert_equal(l[:type], "commit")
     assert(l[:subject])
   end
