@@ -81,11 +81,8 @@ class Irc < PluginBase
     cmd = $commands[cmd_name]
     if !cmd or cmd[0] == Plugin::CmdFlag_Multiple
       plugin_name = cmd_name
-      unless (plugin = $plugins[plugin_name])
-        irc.reply !cmd ? "Unknown command or plugin '#{plugin_name}'." :
-          "Command name is ambiguous. Please use the syntax '<plugin> #{cmd_name}' instead, where <plugin> is one of: \x02#{cmd[1..-1].map { |c| c[2].name }.sort.join(', ')}.\x0f"
-        return nil
-      end
+      # Do nothing if the plugin can't be found
+      return nil unless (plugin = $plugins[plugin_name])
       if help or line == '?'
         irc.reply "#{plugin.brief_help}  Commands: \x02#{plugin.commands.keys.sort.join(', ')}.\x0f"
         return nil
