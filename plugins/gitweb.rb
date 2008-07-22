@@ -17,6 +17,7 @@ class Gitweb < PluginBase
   end
 
   def shorten(url)
+    return nil unless url
     http = Net::HTTP.start("tinyurl.com", 80)
     response = http.post("/create.php", "url=#{url}")
 
