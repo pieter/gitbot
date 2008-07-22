@@ -5,15 +5,28 @@ require 'plugins/irc'
 require 'git'
 require 'test/unit'
 require 'ostruct'
+require 'fileutils'
+# Create a simple repository
+GIT_DIR = "/tmp/tmptestgitdir"
+FileUtils.remove_dir(GIT_DIR) if File.exist?(GIT_DIR)
+`mkdir #{GIT_DIR}; cd #{GIT_DIR}; git init; touch a; git add a; git commit -m "First commit"`
+`mkdir #{GIT_DIR}; cd #{GIT_DIR}; git init; touch a; git add a; git commit -m "First commit"`
 
 TEST_CONFIG = File.join(File.dirname(__FILE__), "test_repos.yml")
 
 class GitwebTest < Test::Unit::TestCase
 
   def setup
+    # Create a simple repository
+    FileUtils.remove_dir(GIT_DIR) if File.exist?(GIT_DIR)
+    `mkdir #{GIT_DIR}; cd #{GIT_DIR}; git init; touch a; git add a; git commit -m "First commit"`
+
     @runner = Git.new(TEST_CONFIG)
     @channel = OpenStruct.new({:nname => "#pieter", :server => OpenStruct.new({:name => "carnique"})})
-    
+  end
+
+  def teardown
+    FileUtils.remove_dir(GIT_DIR)
   end
 
   def parse(message)
@@ -148,4 +161,16 @@ class GitwebTest < Test::Unit::TestCase
     assert_equal("gitbot", h[:reponame])
     assert_equal("HEAD", h[:ref])
   end
+
+  def test_inacessible_local
+    h = parse("This is local: <file://" + GIT_DIR + " HEAD>")
+    assert_nil(h)
+  end
+
+  def test_local_access
+    h = parse("This is a head: <tmptestgitdir HEAD>")
+    assert(h)
+  end
 end
+
+FileUtils.remove_dir(GIT_DIR)

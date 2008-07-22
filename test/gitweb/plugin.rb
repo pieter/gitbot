@@ -1,10 +1,14 @@
 $: << File.join(File.dirname(__FILE__), "..", "..", "lib")
 $: << File.join(File.dirname(__FILE__), "..", "..")
+
+require 'fileutils'
 require 'lib/pluginbase'
 require 'plugins/irc'
 require 'plugins/gitweb'
 require 'test/unit'
 require 'ostruct'
+
+GIT_DIR = "/tmp/tmptestgitdir"
 
 TEST_CONFIG = File.join(File.dirname(__FILE__), "test_repos.yml")
 $config = { "plugins/gitweb/configfile" => TEST_CONFIG}
@@ -38,9 +42,17 @@ end
 
 class GitwebPluginTest < Test::Unit::TestCase
 
-  def setup
+  def setup    
+    # Create a simple repository
+    FileUtils.remove_dir(GIT_DIR) if File.exist?(GIT_DIR)
+    `mkdir #{GIT_DIR}; cd #{GIT_DIR}; git init; touch a; git add a; git commit -m "First commit"`
+
     @irc = MockIrc.new
     @web = Gitweb.new
+  end
+
+  def teardown
+    FileUtils.remove_dir(GIT_DIR)
   end
 
   def test_nil_irc_reply
@@ -81,5 +93,16 @@ class GitwebPluginTest < Test::Unit::TestCase
   def test_external_path
     @web.hook_privmsg_chan(@irc, "Look at <repo:etorrent.git HEAD>")
     assert_match(/^\[etorrent HEAD\]: http.* -- .*/, @irc.message)
+  end
+
+  def test_unacessible_repo_nil
+    @web.hook_privmsg_chan(@irc, "This is local: <file://" + GIT_DIR + " HEAD>")
+    assert_nil(@irc.message)
+  end
+  
+  def test_accessible_local_repo
+    @web.hook_privmsg_chan(@irc, "This is local: <tmptestgitdir HEAD>")
+    assert(@irc.message)
+    assert_equal("[tmptestgitdir HEAD]:  -- First commit", @irc.message)
   end
 end

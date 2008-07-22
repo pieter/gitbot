@@ -33,3 +33,4 @@ end
 
 require 'git/sources/gitweb'
 require 'git/sources/repo'
+require 'git/sources/local'
