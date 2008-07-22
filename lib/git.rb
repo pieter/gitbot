@@ -28,9 +28,7 @@ class Git
   end
 
   def handle_extended(channel, repo, ref, tree)
-    match = repo ? /\b#{repo}\.git/ : nil
-    
-    l = channel.lookup(ref, match, tree)
+    l = channel.lookup(ref, repo, tree)
 
     # Fail loudly if there is no match, but there is a tree or repo specified
     if !l && (tree || repo)

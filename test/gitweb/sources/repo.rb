@@ -18,8 +18,7 @@ class RepoTest < Test::Unit::TestCase
   end
   
   def test_matches
-    assert(@source.matches?(/git/))
-    assert(@source.matches?(/git.git/))
+    assert(@source.matches?("git"))
   end
   
   def test_lookup_HEAD

@@ -18,8 +18,8 @@ class GitwebTest < Test::Unit::TestCase
   end
   
   def test_matches
-    assert(@source.matches?(/gitbot/))
-    assert(@source.matches?(/gitbot.git/))
+    assert(@source.matches?("gitbot"))
+    assert(@source.matches?("git"))
   end
   
   def test_lookup_HEAD
