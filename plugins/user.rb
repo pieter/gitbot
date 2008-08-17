@@ -3,7 +3,7 @@
 #
 
 require 'digest/sha1'
-
+require 'configspace'
 
 # Neat array stuff.
 class Array
