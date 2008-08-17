@@ -13,6 +13,7 @@ plugins:
     configfile: repositories.yaml
   autoload: 
   - gitweb
+  - gitfaq
 servers: 
   carnique: 
     nicks: 
