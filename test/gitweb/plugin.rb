@@ -105,4 +105,16 @@ class GitwebPluginTest < Test::Unit::TestCase
     assert(@irc.message)
     assert_equal("[tmptestgitdir HEAD]:  -- First commit", @irc.message)
   end
+
+  def test_reload_Git
+    class <<Git::Source::Source
+      def has_reloaded
+        false
+      end
+    end
+
+    assert(!Git::Source::Source::has_reloaded)
+    assert(@web.before_reload)
+    assert_raise(NoMethodError) { Git::Source::Source::has_reloaded }
+  end
 end

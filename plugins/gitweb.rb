@@ -2,6 +2,15 @@ require 'git'
 
 class Gitweb < PluginBase
 
+  # Remove the "Git" constant and reload them
+  def before_reload
+    Object.class_eval do
+      remove_const "Git"
+    end
+    $".delete_if { |x| x =~ /^git/}
+    require 'git.rb'
+  end
+
   def initialize(*args)
     $config.merge(
     'plugins' => {
