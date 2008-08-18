@@ -120,39 +120,41 @@ class Irc < PluginBase
     end
 
     def on_privmsg(from, message)
-
+      irc = IrcWrapper.new(from, @server, self)
       # If it's for us, and checks out.
       if message[0] == $command and is_alpha(message[1]) || message[1] == ??
-        irc = IrcWrapper.new(from, @server, self)
         cmd, cmd_name, line = $irc.get_command(irc, message[1..-1])
-        if cmd
-          flags, meth, ins = cmd
-          begin
+      elsif message =~ /#{server.nick}:\w*(.*)$/
+        cmd, cmd_name, line = $irc.get_command(irc, $1)
+      end
 
-            # Security check.
-            $user.command_check(irc, ins.name, cmd_name)
-            $cmd_cnt += 1
+      if cmd
+        flags, meth, ins = cmd
+        begin
 
-            # Bind and execute!
-            line.strip! if line
-            if flags & Plugin::CmdFlag_Server != 0
-              meth.call(irc, @server, line)
-            elsif flags & Plugin::CmdFlag_Channel != 0
-              meth.call(irc, self, line)
-            else
-              meth.call(irc, line)
-            end
-          rescue Plugin::ParseError => e
-            irc.reply e.message
-            irc.reply "USAGE: #{cmd_name} #{e.usage}."
-          rescue User::SecurityError => e
-            irc.reply e.message
-          rescue Exception => e
-            $log.puts e.message
+          # Security check.
+          $user.command_check(irc, ins.name, cmd_name)
+          $cmd_cnt += 1
+
+          # Bind and execute!
+          line.strip! if line
+          if flags & Plugin::CmdFlag_Server != 0
+            meth.call(irc, @server, line)
+          elsif flags & Plugin::CmdFlag_Channel != 0
+            meth.call(irc, self, line)
+          else
+            meth.call(irc, line)
           end
-
+        rescue Plugin::ParseError => e
+          irc.reply e.message
+          irc.reply "USAGE: #{cmd_name} #{e.usage}."
+        rescue User::SecurityError => e
+          irc.reply e.message
+        rescue Exception => e
+          $log.puts e.message
         end
       end
+
       call_hooks(:privmsg_chan, from, message)
     end
 
