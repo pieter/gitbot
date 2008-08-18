@@ -1,9 +1,13 @@
 require 'yaml'
+require 'open-uri'
+require 'cgi'
 
 class Gitfaq < PluginBase
 
   attr_reader :entries
   attr_accessor :skip_auth
+
+  FAQ_URL = "http://frim.frim.nl/gitfaq.html"
 
   def authed?(irc)
     unless $user.caps(irc, 'faq', 'op', 'owner').any? or skip_auth
@@ -27,38 +31,36 @@ class Gitfaq < PluginBase
     super(*args)
   end
 
-  def load
-    @filename = $config["plugins/gitfaq/phrasesfile"] || "faq.yaml"
-    begin
-      @entries = YAML::load_file(@filename)
-    rescue Errno::ENOENT => e
-      puts "GitFAQ: phrases file not found"
+  def load_entries
+    @last_fetch = Time.now
+    @run_thread = Thread.new do
       @entries = {}
+      a = open(FAQ_URL).read
+      a.scan(/<!-- GitLink\[(.*)\] (.*) -->/) do |x|
+        @entries[x[0]] = x[1]
+      end
     end
-    self
+  end
+
+  def load
+    load_entries
+    return self
   end
 
   def cmd_faq(irc, line)
-    puts line
+    if Time.now - @last_fetch > 60 * 60 # Refetch after 1 hour
+      load_entries
+    end
+
     if f = @entries[line]
-      irc.reply "#{line}: #{f}"
+      irc.reply "#{line}: #{f}. See #{FAQ_URL}##{CGI::escape(line)}"
     else
       irc.reply "FAQ entry '#{line}' not found."
     end
   end
 
-  def cmd_add_faq(irc, line)
-    return unless authed?(irc)
-    entry, response = line.split(" ", 2)
-    if response
-      @entries[entry] = response
-      File.open(@filename, "w") do |f|
-        f.puts @entries.to_yaml
-      end
-      irc.reply "FAQ entry '#{entry}' stored."
-    else
-      irc.reply "Invalid line"
-    end
+  def cmd_reload(irc, line)
+    load_entries
+    irc.reply "Reloading FAQ entries"
   end
-
 end

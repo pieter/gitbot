@@ -44,28 +44,22 @@ class MockIrc
 
 end
 
+class Gitfaq
+  FAQ_URL = "faq-test.html"
+end
+
 class GitFAQPluginTest < Test::Unit::TestCase
 
   def setup
-    File.open(TEST_PHRASES_FILE, "w") { |f| f.puts "---\nstored: This is a stored phrase" }
     @irc = MockIrc.new
     @plugin = Gitfaq.new.load
-  end
-
-  def teardown
-    File.unlink(TEST_PHRASES_FILE)
-  end
-
-  def test_add_unauthorized
-    @plugin.cmd_add_faq(@irc, "test dit")
-    assert_equal(@irc.message, "You aren't allowed to use this command")
-    assert_nil(@plugin.entries["test"])
+    sleep 0.1 # Sleep to allow the entries to load
   end
 
   def test_lookup_unauthorized
-    assert(@plugin.entries["stored"])
-    @plugin.cmd_faq(@irc, "stored")
-    assert_equal("stored: This is a stored phrase", @irc.message)
+    assert(@plugin.entries["ssh-config"])
+    @plugin.cmd_faq(@irc, "ssh-config")
+    assert_equal("ssh-config: You can setup a new entry in ~/.ssh/config with the right key. See #{Gitfaq::FAQ_URL}#ssh-config", @irc.message)
   end
 
   def test_lookup_unknown
@@ -74,13 +68,19 @@ class GitFAQPluginTest < Test::Unit::TestCase
     assert_equal("FAQ entry 'nothing' not found.", @irc.message)
   end
 
-  def test_add_authorized
-    @plugin.skip_auth = true
-    @plugin.cmd_add_faq(@irc, "test dit")
-    assert_equal("FAQ entry 'test' stored.", @irc.message)
-    assert_equal("dit", @plugin.entries["test"])
+  def test_cmd_reload
+    assert_nil(@plugin.entries["waa"])
+    @plugin.entries["waa"] = "Hehe"
+    assert(@plugin.entries["waa"])
+    @plugin.cmd_reload(@irc, "")
+    assert_equal("Reloading FAQ entries", @irc.message)
+    sleep 0.1
+    assert_nil(@plugin.entries["waa"])
+  end
 
-    @plugin.cmd_faq(@irc, "test")
-    assert_equal("test: dit", @irc.message)
+  def test_escape
+    assert(@plugin.entries["space command"])
+    @plugin.cmd_faq(@irc, "space command")
+    assert_equal("space command: this is an entry with a space in it. See #{Gitfaq::FAQ_URL}#space+command", @irc.message)
   end
 end
