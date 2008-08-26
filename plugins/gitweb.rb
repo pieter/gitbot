@@ -1,4 +1,5 @@
 require 'git'
+require 'support/tinyurl'
 
 class Gitweb < PluginBase
 
@@ -25,20 +26,6 @@ class Gitweb < PluginBase
     super(*args)
   end
 
-  def shorten(url)
-    return nil unless url
-    http = Net::HTTP.start("tinyurl.com", 80)
-    response = http.post("/create.php", "url=#{url}")
-
-    if response.code == "200"
-      body = response.read_body
-      line = body.split("\n").find { |l| l =~ /hidden name=tinyurl/ }
-      i1 = line.index("http")
-      i2 = line.rindex("\"")
-      return line[i1...i2]
-    end
-  end
-
   def load
     @loader = Git.new($config["plugins/gitweb/configfile"])
   end
@@ -50,7 +37,7 @@ class Gitweb < PluginBase
     else
       name = r[:ref][0..8]
     end
-    s = "[#{r[:reponame]} #{name}]: #{shorten(r[:url])}"
+    s = "[#{r[:reponame]} #{name}]: #{TinyURL.tiny(r[:url])}"
     if r[:subject]
       s << " -- #{r[:subject]}"
     else
