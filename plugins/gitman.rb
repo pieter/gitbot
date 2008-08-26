@@ -5,7 +5,7 @@ require 'support/tinyurl'
 class Gitman < PluginBase
 
   def handle_manpage(irc, page)
-    @current_lookup.join if @current_lookup
+    @current_lookup.kill if @current_lookup
     @current_lookup = Thread.new(irc, page) do |irc, page|
       begin
         uri = URI.parse("http://www.kernel.org/pub/software/scm/git/docs/#{page}.html")
