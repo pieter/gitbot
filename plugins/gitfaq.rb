@@ -47,20 +47,41 @@ class Gitfaq < PluginBase
     return self
   end
 
-  def cmd_faq(irc, line)
+  def handle_faq(irc, page, reply_to, explicit = false)
     if Time.now - @last_fetch > 60 * 60 # Refetch after 1 hour
       load_entries
     end
 
-    if f = @entries[line]
-      irc.reply "#{line}: #{f}. See #{FAQ_URL}##{CGI::escape(line)}"
-    else
-      irc.reply "FAQ entry '#{line}' not found."
+    if f = @entries[page]
+      if reply_to
+        irc.puts "#{reply_to}: #{f}. See #{FAQ_URL}##{CGI::escape(page)}"
+      else
+        irc.puts "#{f}. See #{FAQ_URL}##{CGI::escape(page)}"
+      end
+    elsif explicit
+      irc.reply "FAQ entry '#{page}' not found."
     end
+  end
+
+  def cmd_faq(irc, line)
+    handle_faq(irc, line, irc.from, true)
   end
 
   def cmd_reload(irc, line)
     load_entries
     irc.reply "Reloading FAQ entries"
   end
+
+  def hook_privmsg_chan(irc, msg)
+    return unless msg =~ /faq ([\-a-z]+)/
+    page = $1
+
+    # Get the name to faq to
+    if msg =~ /^([a-zA-Z\-_`\[\]]{2,15})[:,] /
+      reply_to = $1
+    end
+
+    handle_faq(irc, page, reply_to)
+  end
+
 end
