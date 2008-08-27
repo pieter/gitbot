@@ -39,6 +39,17 @@ class IrcWrapper
     $config['comm/use-notices'] ? notice_respond(str) : privmsg_respond(str)
   end
 
+  def reply_dwim(original, message)
+
+    # Get the name to reply to
+    if original =~ /^([a-zA-Z\-_`\[\]]{2,15})[:,] /
+      puts "#{$1}: #{message}"
+    else
+      puts "#{from}: #{message}"
+    end
+    
+  end
+
   # Direct output.
   def privmsg(str)
     @channel ? @channel.privmsg(str) : @from.privmsg(str)

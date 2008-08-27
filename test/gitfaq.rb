@@ -59,7 +59,7 @@ class GitFAQPluginTest < Test::Unit::TestCase
 
   def test_implicit_without_reply
     @plugin.hook_privmsg_chan(@irc, "I read faq ssh-config")
-    assert_equal("You can setup a new entry in ~/.ssh/config with the right key. See #{Gitfaq::FAQ_URL}#ssh-config", @irc.message)
+    assert_equal("Pieter: You can setup a new entry in ~/.ssh/config with the right key. See #{Gitfaq::FAQ_URL}#ssh-config", @irc.message)
   end
 
   def test_implicit_failed_lookup

@@ -47,24 +47,20 @@ class Gitfaq < PluginBase
     return self
   end
 
-  def handle_faq(irc, page, reply_to, explicit = false)
+  def handle_faq(irc, line, page, explicit = false)
     if Time.now - @last_fetch > 60 * 60 # Refetch after 1 hour
       load_entries
     end
 
     if f = @entries[page]
-      if reply_to
-        irc.puts "#{reply_to}: #{f}. See #{FAQ_URL}##{CGI::escape(page)}"
-      else
-        irc.puts "#{f}. See #{FAQ_URL}##{CGI::escape(page)}"
-      end
+      irc.reply_dwim(line, "#{f}. See #{FAQ_URL}##{CGI::escape(page)}")
     elsif explicit
       irc.reply "FAQ entry '#{page}' not found."
     end
   end
 
   def cmd_faq(irc, line)
-    handle_faq(irc, line, irc.from, true)
+    handle_faq(irc, line, line, true)
   end
 
   def cmd_reload(irc, line)
@@ -76,12 +72,7 @@ class Gitfaq < PluginBase
     return unless msg =~ /faq ([\-a-z]+)/
     page = $1
 
-    # Get the name to faq to
-    if msg =~ /^([a-zA-Z\-_`\[\]]{2,15})[:,] /
-      reply_to = $1
-    end
-
-    handle_faq(irc, page, reply_to)
+    handle_faq(irc, msg, page)
   end
 
 end

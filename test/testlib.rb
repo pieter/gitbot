@@ -8,9 +8,12 @@ require 'test/unit'
 require 'ostruct'
 
 
-class MockIrc
+class MockIrc < IrcWrapper
 
   attr_reader :message
+
+  def initialize
+  end
 
   def from
     "Pieter"
