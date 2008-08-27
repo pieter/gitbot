@@ -34,10 +34,15 @@ class Gitfaq < PluginBase
   def load_entries
     @last_fetch = Time.now
     @run_thread = Thread.new do
-      @entries = {}
-      a = open(FAQ_URL).read
-      a.scan(/<!-- GitLink\[(.*)\] (.*) -->/) do |x|
-        @entries[x[0]] = x[1]
+      begin
+        a = open(FAQ_URL).read
+        @new_entries = {}
+        a.scan(/<!-- GitLink\[(.*)\] (.*) -->/) do |x|
+          @new_entries[x[0]] = x[1]
+        end
+        @entries = @new_entries
+      rescue SocketError => e
+        $log.puts "Could not fetch FAQ page: #{e}. #{e.message}"
       end
     end
   end
