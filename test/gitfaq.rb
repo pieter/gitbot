@@ -2,8 +2,8 @@ require File.join(File.dirname(__FILE__), 'testlib')
 require 'plugins/gitfaq'
 require 'plugins/user'
 
-TEST_PHRASES_FILE = File.join(File.dirname(__FILE__), "test_faq.yaml")
-$config = { "plugins/gitfaq/phrasesfile" => TEST_PHRASES_FILE}
+TEST_PHRASES_FILE = File.join(File.dirname(__FILE__), "faq-test.html")
+$config = { }
 $hooks = {}
 $commands = {}
 $plugins = {}
@@ -11,7 +11,7 @@ $plugins = {}
 User.new
 
 class Gitfaq
-  FAQ_URL = "faq-test.html"
+  FAQ_URL = TEST_PHRASES_FILE
 end
 
 class GitFAQPluginTest < Test::Unit::TestCase
