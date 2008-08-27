@@ -1,8 +1,6 @@
-$: << File.join(File.dirname(__FILE__), "..", "..", "..", "lib")
+require File.join(File.dirname(__FILE__), "..", "..", "testlib")
+
 require 'git'
-require 'fileutils'
-require 'test/unit'
-require 'ostruct'
 
 GIT_DIR = "/tmp/tmptestgitdir"
 FileUtils.remove_dir(GIT_DIR) if File.exist?(GIT_DIR)

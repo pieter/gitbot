@@ -1,44 +1,12 @@
-$: << File.join(File.dirname(__FILE__), "..", "..", "lib")
-$: << File.join(File.dirname(__FILE__), "..", "..")
+require File.join(File.dirname(__FILE__), "..", "testlib")
 
-require 'fileutils'
-require 'lib/pluginbase'
-require 'plugins/irc'
 require 'plugins/gitweb'
-require 'test/unit'
-require 'ostruct'
 
 GIT_DIR = "/tmp/tmptestgitdir"
 
 TEST_CONFIG = File.join(File.dirname(__FILE__), "test_repos.yml")
 $config = { "plugins/gitweb/configfile" => TEST_CONFIG}
 $hooks = {}
-class MockIrc
-
-  attr_reader :message
-
-  def puts(m)
-    @message = m
-  end
-
-  def server
-    o = OpenStruct.new
-    o.name = "carnique"
-    o
-  end
-
-  def channel
-    o = OpenStruct.new
-    o.nname = "#pieter"
-    o.server = server
-    o
-  end
-
-  def reply(message)
-    @message = message
-  end
-
-end
 
 class GitwebPluginTest < Test::Unit::TestCase
 

@@ -1,12 +1,6 @@
-$: << File.join(File.dirname(__FILE__), "..", "lib")
-$: << File.join(File.dirname(__FILE__), "..")
-
-require 'lib/pluginbase'
-require 'plugins/irc'
+require File.join(File.dirname(__FILE__), 'testlib')
 require 'plugins/gitfaq'
 require 'plugins/user'
-require 'test/unit'
-require 'ostruct'
 
 TEST_PHRASES_FILE = File.join(File.dirname(__FILE__), "test_faq.yaml")
 $config = { "plugins/gitfaq/phrasesfile" => TEST_PHRASES_FILE}
@@ -15,38 +9,6 @@ $commands = {}
 $plugins = {}
 
 User.new
-
-
-class MockIrc
-
-  attr_reader :message
-
-  def from
-    "Pieter"
-  end
-
-  def puts(m)
-    @message = m
-  end
-
-  def server
-    o = OpenStruct.new
-    o.name = "carnique"
-    o
-  end
-
-  def channel
-    o = OpenStruct.new
-    o.nname = "#pieter"
-    o.server = server
-    o
-  end
-
-  def reply(message)
-    @message = message
-  end
-
-end
 
 class Gitfaq
   FAQ_URL = "faq-test.html"

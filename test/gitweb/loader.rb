@@ -1,11 +1,7 @@
-$: << File.join(File.dirname(__FILE__), "..", "..", "lib")
-$: << File.join(File.dirname(__FILE__), "..", "..")
-require 'pluginbase'
-require 'plugins/irc'
+require File.join(File.dirname(__FILE__), "..", "testlib")
+
 require 'git'
-require 'test/unit'
-require 'ostruct'
-require 'fileutils'
+
 # Create a simple repository
 GIT_DIR = "/tmp/tmptestgitdir"
 FileUtils.remove_dir(GIT_DIR) if File.exist?(GIT_DIR)

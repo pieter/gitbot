@@ -1,7 +1,5 @@
-$: << File.join(File.dirname(__FILE__), "..", "..", "..", "lib")
+require File.join(File.dirname(__FILE__), "..", "..", "testlib")
 require 'git'
-require 'test/unit'
-require 'ostruct'
 
 class GitwebTest < Test::Unit::TestCase
   
