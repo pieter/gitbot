@@ -11,7 +11,7 @@ class Gitman < PluginBase
         uri = URI.parse("http://www.kernel.org/pub/software/scm/git/docs/#{page}.html")
         response = Net::HTTP.get_response(uri)
         if response.is_a? Net::HTTPSuccess
-          irc.reply_dwim msg, "the #{page} manpage can be found at #{uri.to_s}."
+          irc.reply_dwim msg, "the #{page} manpage can be found at #{uri.to_s}"
         end
       rescue SocketError
         $log.puts "Could not look up entry #{page}"
