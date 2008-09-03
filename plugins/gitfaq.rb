@@ -73,6 +73,10 @@ class Gitfaq < PluginBase
     irc.reply "Reloading FAQ entries"
   end
 
+  def cmd_list(irc, line)
+    irc.reply "Valid topics: #{@entries.keys.sort.join(", ")}"
+  end
+
   def hook_privmsg_chan(irc, msg)
     return unless msg =~ /faq ([\-a-z]+)/
     page = $1

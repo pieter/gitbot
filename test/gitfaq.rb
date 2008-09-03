@@ -69,4 +69,8 @@ class GitFAQPluginTest < Test::Unit::TestCase
     assert_equal(nil, @irc.message)
   end
 
+  def test_list_entries
+    @plugin.cmd_list(@irc, "")
+    assert_equal("Valid topics: non-bare, push-f, space command, ssh-config", @irc.message)
+  end
 end
