@@ -3,7 +3,11 @@ class TinyURL
   def self.tiny(url)
     return nil unless url
     http = Net::HTTP.start("tinyurl.com", 80)
-    response = http.post("/create.php", "url=#{url}")
+    begin
+      response = http.post("/create.php", "url=#{url}")
+    rescue Exception => e
+      return url
+    end
 
     if response.code == "200"
       body = response.read_body
