@@ -62,6 +62,11 @@ class GitwebPluginTest < Test::Unit::TestCase
     @web.hook_privmsg_chan(@irc, "Look at <repo:etorrent.git HEAD>")
     assert_match(/^\[etorrent HEAD\]: http.* -- .*/, @irc.message)
   end
+  
+  def test_external_complex
+    @web.hook_privmsg_chan(@irc, "<repo:linux-2.6.git 6c3a158316>")
+    assert_match(/^\[linux-2.6 6c3a15831\]: http.* -- .*/, @irc.message)
+  end
 
   def test_unacessible_repo_nil
     @web.hook_privmsg_chan(@irc, "This is local: <file://" + GIT_DIR + " HEAD>")

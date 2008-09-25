@@ -23,7 +23,7 @@ class Git::Source::Gitweb
   end
   
   def matches?(match)
-    return @url =~ /\b#{match}[a-z]*\.git/
+    return @url =~ /\b#{match}[a-z\-\.0-9]*\.git/
   end
 
   def object_url(ref, file)

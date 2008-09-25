@@ -52,7 +52,7 @@ class Git
     when /<(?:([a-zA-Z0-9\-]+) )?([^:?\^\$\~ ]+?)(:([^:?\^\$\~ ]+))?>/
       return handle_extended(channel, $1, $2, $4)
     # Matches an explicit repo
-    when /<([a-z]+:[a-zA-Z0-9\/\?=;.]+) ([^:?\^\$\~ ]+?)(:([^:?\^\$\~ ]+))?>/
+    when /<([a-z]+:[a-zA-Z0-9\/\?=;.\-]+) ([^:?\^\$\~ ]+?)(:([^:?\^\$\~ ]+))?>/
       return unless repo = Git::Source::Source.find_public($1)
       return repo.lookup($2, $4)
     when /\b([0-9a-f]{6,40})\b/
