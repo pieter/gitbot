@@ -4,7 +4,7 @@ require 'support/tinyurl'
 class Gitweb < PluginBase
 
   # Remove the "Git" constant and reload them
-  def before_reload
+  def before_reload(force)
     Object.class_eval do
       remove_const "Git"
     end
