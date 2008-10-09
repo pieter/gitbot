@@ -10,11 +10,15 @@ class TinyURL
     end
 
     if response.code == "200"
-      body = response.read_body
-      line = body.split("\n").find { |l| l =~ /hidden name=tinyurl/ }
-      i1 = line.index("http")
-      i2 = line.rindex("\"")
-      return line[i1...i2]
+      begin
+        body = response.read_body
+        line = body.split("\n").find { |l| l =~ /^copy\('/ }
+        i1 = line.index("http")
+        i2 = line.rindex("\'")
+        return line[i1...i2]
+      rescue Exception => e
+        return url
+      end
     end
   end
 
