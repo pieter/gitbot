@@ -42,7 +42,7 @@ class IrcWrapper
   def reply_dwim(original, message)
 
     # Get the name to reply to
-    if original =~ /^([a-zA-Z\-_`\[\]]{2,15})[:,] /
+    if original =~ /^([a-zA-Z\-_`\[\]0-9]{2,15})[:,] /
       puts "#{$1}: #{message}"
     else
       puts "#{from}: #{message}"
