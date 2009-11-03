@@ -39,7 +39,7 @@ class Git::Source::Gitweb
     url = object_url(ref, file)
     response = Net::HTTP.get_response(url)
     if response.is_a? Net::HTTPRedirection
-      if response["Location"] =~ /[\?;]a=(.*?)($|\&|;)/
+      if response["Location"] =~ /[\?;]a=(.*?)($|\&|;)/ || response["Location"] =~ /#{name}.git\/([a-z]+)\//
         type = $1
         # Point to commitdiff and not commitpage when referring a commit
         new_url = response["Location"].gsub("a=commit;", "a=commitdiff;")
