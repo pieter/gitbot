@@ -37,7 +37,7 @@ class Gitfaq < PluginBase
       begin
         a = open(FAQ_URL).read
         @new_entries = {}
-        a.scan(/<!-- GitLink\[(.*)\] (.*) -->/) do |x|
+        a.scan(/<span id="(.*)" title="(.*)">/) do |x|
           @new_entries[x[0]] = x[1]
         end
         @entries = @new_entries
