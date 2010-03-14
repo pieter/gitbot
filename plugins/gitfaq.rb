@@ -7,7 +7,7 @@ class Gitfaq < PluginBase
   attr_reader :entries
   attr_accessor :skip_auth
 
-  FAQ_URL = "http://git.or.cz/gitwiki/GitFaq"
+  FAQ_URL = "http://git.wiki.kernel.org/index.php/GitFaq"
 
   def authed?(irc)
     unless $user.caps(irc, 'faq', 'op', 'owner').any? or skip_auth
